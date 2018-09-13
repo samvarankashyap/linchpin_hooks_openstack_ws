@@ -1,0 +1,51 @@
+---
+os-server-addl-vols:
+  topology:
+    topology_name: os-server-inst
+    resource_groups:
+      - resource_group_name: os-server-addl-vols
+        resource_group_type: openstack
+        resource_definitions:
+          - name: "database"
+            role: os_server
+            flavor: m1.small
+            image: CentOS-7-x86_64-GenericCloud-1612
+            count: 1
+            keypair: testkeypair_sk
+            fip_pool: 10.8.240.0
+            networks:
+              - e2e-openstack
+        credentials:
+          filename: clouds.yaml
+          profile: ci-rhos
+  layout:
+    inventory_layout:
+      vars:
+        hostname: __IP__
+      hosts:
+        addl-vols-node:
+          count: 1
+          host_groups:
+            - hello
+  hooks:
+    postup:
+      - name: test
+        type: ansible
+        context: True
+        actions:
+          - playbook: ping.yaml
+            extra_vars: 
+              ansible_ssh_private_key_file: "/home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem"
+              ansible_ssh_user: centos
+      - name: osoos
+        type: ansible
+        context: True
+        actions:
+          - playbook: install_packages.yaml
+            extra_vars:
+              ansible_ssh_private_key_file: "/home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem"
+              ansible_ssh_user: centos
+          - playbook: git_clone.yaml
+            extra_vars:
+              ansible_ssh_private_key_file: "/home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem"
+              ansible_ssh_user: centos
