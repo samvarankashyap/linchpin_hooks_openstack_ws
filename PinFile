@@ -29,6 +29,15 @@ os-server-addl-vols:
             - hello
   hooks:
     postup:
+      - name: check_ssh
+        extra_vars:
+          ansible_ssh_private_key_file:  /home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem
+          ansible_ssh_user: centos
+      - name: ping
+      - name: port_up
+        extra_vars:
+          ports:
+            - 22
       - name: test
         type: ansible
         context: True
