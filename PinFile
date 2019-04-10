@@ -3,21 +3,22 @@ os-server-addl-vols:
   topology:
     topology_name: os-server-inst
     resource_groups:
-      - resource_group_name: os-server-addl-vols
+      - resource_group_name: os-server-test-lp
         resource_group_type: openstack
         resource_definitions:
-          - name: "database"
+          - name: linchpintestkey
+            role: os_keypair
+          - name: "linchpintestdatabase"
             role: os_server
             flavor: m1.small
-            image: CentOS-7-x86_64-GenericCloud-1612
+            image: CentOS-7-x86_64-GenericCloud-1808
             count: 1
-            keypair: testkeypair_sk
-            fip_pool: 10.8.240.0
+            keypair: linchpintestkey
             networks:
-              - e2e-openstack
+              - provider_net_cci_6
         credentials:
           filename: clouds.yaml
-          profile: ci-rhos
+          profile: openstack
   layout:
     inventory_layout:
       vars:
@@ -27,34 +28,15 @@ os-server-addl-vols:
           count: 1
           host_groups:
             - hello
-  hooks:
-    postup:
-      - name: check_ssh
-        extra_vars:
-          ansible_ssh_private_key_file:  /home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem
-          ansible_ssh_user: centos
-      - name: ping
-      - name: port_up
-        extra_vars:
-          ports:
-            - 22
-      - name: test
-        type: ansible
-        context: True
-        actions:
-          - playbook: ping.yaml
-            extra_vars: 
-              ansible_ssh_private_key_file: "/home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem"
-              ansible_ssh_user: centos
-      - name: osoos
-        type: ansible
-        context: True
-        actions:
-          - playbook: install_packages.yaml
-            extra_vars:
-              ansible_ssh_private_key_file: "/home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem"
-              ansible_ssh_user: centos
-          - playbook: git_clone.yaml
-            extra_vars:
-              ansible_ssh_private_key_file: "/home/srallaba/workspace/lp_ws/ex_hooks/os_workspace/keys/testkeypair_sk.pem"
-              ansible_ssh_user: centos
+#  hooks:
+#    postup:
+#      # check_ssh, ping and port_up are builtin hooks
+#      # note builtin hooks follow different structure when compared to localhooks
+#      - name: check_ssh
+#        extra_vars:
+#          # since checking ssh depends on logging into machine pem file, ssh_user are must
+#          ansible_ssh_private_key_file:  /home/srallaba/.ssh/test_keypairsk2.key
+#          ansible_ssh_user: centos
+#          ansible_ssh_common_args: "'-o StrictHostKeyChecking=no'"
+#          ansible_python_interpreter: "/usr/bin/python"
+#      - name: ping
